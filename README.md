@@ -1,1 +1,1 @@
-# Vue Spin Wheel 🤸
+# Vue Spin Wheel 🌀

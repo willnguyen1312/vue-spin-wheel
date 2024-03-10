@@ -30,6 +30,12 @@ const finalPeople = computed(() =>
   people.value.filter((person) => includedPeople.value.includes(person.name))
 );
 
+const resultList = computed(() => {
+  const reversedList = includedPeople.value.slice(1);
+  reversedList.reverse();
+  return [includedPeople.value[0], ...reversedList];
+});
+
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
@@ -58,6 +64,12 @@ const handleAnimationEnd = () => {
     currentDeg.value = spinDeg.value % 360;
     spinDeg.value = currentDeg.value;
   }
+
+  const winner =
+    resultList.value[
+      Math.floor(spinDeg.value / (360 / resultList.value.length))
+    ];
+  alert(`The winner is ${winner}`);
 };
 
 const handleClick = () => {
@@ -95,9 +107,8 @@ const handleClick = () => {
         </button>
       </div>
 
-      <div class="pointer-wrapper">
-        <div class="pointer"></div>
-      </div>
+      <div class="pointer pointer-up"></div>
+      <div class="pointer pointer-down"></div>
     </div>
 
     <fieldset class="fieldset">
@@ -157,6 +168,7 @@ const handleClick = () => {
 }
 
 .spin-wrapper {
+  position: relative;
   width: var(--spin-wrapper-size);
   height: var(--spin-wrapper-size);
 }
@@ -176,22 +188,15 @@ const handleClick = () => {
   animation-name: spinning;
 }
 
-.pointer-wrapper {
-  height: var(--pointer-height);
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  position: relative;
-}
-
 .pointer {
-  top: -100%;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -100%);
   height: 40px;
   width: 80px;
   overflow: hidden;
   position: absolute;
   transform-origin: 50% 100%;
-  rotate: 120deg;
 
   &:before {
     height: inherit;
@@ -200,9 +205,16 @@ const handleClick = () => {
     content: "";
     border-radius: 40px 40px 0 0;
     transform-origin: 50% 100%;
-    rotate: 120deg;
+    rotate: 150deg;
     background-color: blueviolet;
   }
+}
+.pointer-up {
+  transform: translate(50%, -100%);
+}
+
+.pointer-down {
+  transform: translate(50%, -100%) scaleY(-1);
 }
 
 .activator {

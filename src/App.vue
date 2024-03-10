@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, watchEffect } from "vue";
 const state = ref<"idle" | "spinning" | "finished">("idle");
 const spinDeg = ref(0);
 const currentDeg = ref(0);
@@ -7,27 +7,40 @@ const spinRef = ref<HTMLElement>();
 
 const randomHslColor = () => {
   const h = Math.floor(Math.random() * 361);
-  const s = 100; // Full saturation
-  const l = Math.floor(Math.random() * (100 - 50) + 50); // Lightness between 50% and 100%
+  const s = 100;
+  const l = Math.floor(Math.random() * (100 - 50) + 50);
   return `hsl(${h},${s}%,${l}%)`;
 };
 
-const items = ref<{ name: string; exclude?: boolean; color?: string }[]>(
+const people = ref<{ name: string; include?: boolean; color?: string }[]>(
   JSON.parse(localStorage.getItem("items") ?? "[]")
 );
 
-items.value = items.value.map((item) => ({
+people.value = people.value.map((item) => ({
   ...item,
   color: item.color ?? randomHslColor(),
+  include: item.include ?? true,
 }));
 
+const includedPeople = ref<string[]>(
+  JSON.parse(localStorage.getItem("includedPeople") ?? "[]")
+);
+
+const finalPeople = computed(() =>
+  people.value.filter((person) => includedPeople.value.includes(person.name))
+);
+
+watchEffect(() => {
+  localStorage.setItem("includedPeople", JSON.stringify(includedPeople.value));
+});
+
 const getStyle = (index: number) => {
-  const rotate = 360 / items.value.length;
+  const rotate = 360 / finalPeople.value.length;
   const rotateDeg = rotate * index;
   const sliceDegree = 180 - rotate;
   return {
     "--slice-degree": `${sliceDegree}deg`,
-    "--background-color": items.value[index].color,
+    "--background-color": finalPeople.value[index].color,
     "--rotate-degree": `${rotateDeg}deg`,
     "--rotate-content": `${-rotateDeg}deg`,
     "--text-position": "4%",
@@ -58,7 +71,7 @@ const handleClick = () => {
     <div class="spin-wrapper">
       <div ref="spinRef" class="spin" @animationend="handleAnimationEnd">
         <div
-          v-for="(item, index) in items"
+          v-for="(item, index) in finalPeople"
           :key="item.name"
           class="pie"
           :style="getStyle(index)"
@@ -83,16 +96,60 @@ const handleClick = () => {
         <div class="pointer"></div>
       </div>
     </div>
+
+    <fieldset class="fieldset">
+      <legend class="legend">Members</legend>
+      <div class="members">
+        <div
+          v-for="(person, personIdx) in people"
+          :key="personIdx"
+          class="member-wrapper"
+        >
+          <label :for="`person-${person.name}`">{{ person.name }}</label>
+
+          <input
+            :id="`person-${person.name}`"
+            :name="`person-${person.name}`"
+            type="checkbox"
+            v-model="includedPeople"
+            :value="person.name"
+          />
+        </div>
+      </div>
+    </fieldset>
   </div>
 </template>
 
 <style>
+.fieldset {
+  height: fit-content;
+}
+
+.legend {
+  font-size: large;
+  font-weight: bold;
+}
+
+.members {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100px;
+}
+
+.member-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: large;
+}
+
 .wrapper {
   --pointer-height: 40px;
   --spin-wrapper-size: 600px;
   --spinning-deg: v-bind(spinDeg + "deg");
   display: flex;
-  gap: 20px;
+  gap: 100px;
 }
 
 .spin-wrapper {

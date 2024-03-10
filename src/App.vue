@@ -12,14 +12,19 @@ const randomHslColor = () => {
   return `hsl(${h},${s}%,${l}%)`;
 };
 
-const people = ref<{ name: string; include?: boolean; color?: string }[]>(
-  JSON.parse(localStorage.getItem("items") ?? "[]")
-);
+type Person = {
+  name: string;
+  avatarUrl: string;
+  color?: string;
+};
+
+const people = ref<Person[]>(JSON.parse(localStorage.getItem("items") ?? "[]"));
+
+const winner = ref<Person>();
 
 people.value = people.value.map((item) => ({
   ...item,
   color: item.color ?? randomHslColor(),
-  include: item.include ?? true,
 }));
 
 const includedPeople = ref<string[]>(
@@ -68,15 +73,22 @@ const handleAnimationEnd = () => {
     spinDeg.value = currentDeg.value;
   }
 
-  const winner =
+  const result =
     resultList.value[
       Math.floor(spinDeg.value / (360 / resultList.value.length))
     ];
-  alert(`The winner is ${winner}`);
+
+  const winnerPerson = finalPeople.value.find(
+    (person) => person.name === result
+  );
+  if (winnerPerson) {
+    winner.value = winnerPerson;
+  }
 };
 
 const handleClick = () => {
   if (state.value === "idle" || state.value === "finished") {
+    winner.value = undefined;
     state.value = "spinning";
     spinDeg.value += 7000 + Math.floor(Math.random() * 5000);
     spinRef.value?.classList.add("spin-animation");
@@ -134,6 +146,10 @@ const handleClick = () => {
         </div>
       </div>
     </fieldset>
+  </div>
+
+  <div class="winner-wrapper">
+    <img v-if="winner" :src="winner.avatarUrl" class="winner" />
   </div>
 </template>
 
@@ -297,7 +313,15 @@ const handleClick = () => {
   }
 }
 
-.fadeInUp-animation {
-  animation: 1.5s fadeInUp;
+.winner-wrapper {
+  padding-top: 32px;
+  width: 100vw;
+  display: grid;
+  place-content: center;
+}
+
+.winner {
+  border-radius: 16px;
+  animation: 3s fadeInUp;
 }
 </style>

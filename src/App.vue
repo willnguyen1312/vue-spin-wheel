@@ -15,7 +15,7 @@
       <p class="content">Ha</p>
     </div>
 
-    <div class="center"></div>
+    <div class="center">🌀</div>
   </div>
 </template>
 
@@ -25,6 +25,9 @@
   width: 30px;
   height: 30px;
   background-color: white;
+  display: grid;
+  place-content: center;
+  font-size: 23px;
 
   top: 50%;
   left: 50%;

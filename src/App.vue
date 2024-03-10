@@ -31,9 +31,12 @@ const finalPeople = computed(() =>
 );
 
 const resultList = computed(() => {
-  const reversedList = includedPeople.value.slice(1);
+  const initialList = finalPeople.value
+    .filter((person) => includedPeople.value.includes(person.name))
+    .map((person) => person.name);
+  const reversedList = initialList.slice(1);
   reversedList.reverse();
-  return [includedPeople.value[0], ...reversedList];
+  return [initialList[0], ...reversedList];
 });
 
 watchEffect(() => {
@@ -281,5 +284,20 @@ const handleClick = () => {
   position: absolute;
   left: var(--text-position);
   bottom: var(--text-position);
+}
+
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+.fadeInUp-animation {
+  animation: 1.5s fadeInUp;
 }
 </style>

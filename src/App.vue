@@ -4,19 +4,30 @@ const state = ref<"idle" | "spinning" | "finished">("idle");
 const spinDeg = ref(0);
 const currentDeg = ref(0);
 const spinRef = ref<HTMLElement>();
-const names = ["Vi", "Nam", "Truong", "Ha", "Dung", "Bach"];
 
-const intake = 6;
+const randomHslColor = () => {
+  const h = Math.floor(Math.random() * 361);
+  const s = 100; // Full saturation
+  const l = Math.floor(Math.random() * (100 - 50) + 50); // Lightness between 50% and 100%
+  return `hsl(${h},${s}%,${l}%)`;
+};
 
-const finalList = names.slice(0, intake);
+const items = ref<{ name: string; exclude?: boolean; color?: string }[]>(
+  JSON.parse(localStorage.getItem("items") ?? "[]")
+);
+
+items.value = items.value.map((item) => ({
+  ...item,
+  color: item.color ?? randomHslColor(),
+}));
 
 const getStyle = (index: number) => {
-  const rotate = 360 / intake;
+  const rotate = 360 / items.value.length;
   const rotateDeg = rotate * index;
   const sliceDegree = 180 - rotate;
   return {
     "--slice-degree": `${sliceDegree}deg`,
-    "--background-color": `hsl(${rotateDeg}, 100%, 50%)`,
+    "--background-color": items.value[index].color,
     "--rotate-degree": `${rotateDeg}deg`,
     "--rotate-content": `${-rotateDeg}deg`,
     "--text-position": "4%",
@@ -47,14 +58,14 @@ const handleClick = () => {
     <div class="spin-wrapper">
       <div ref="spinRef" class="spin" @animationend="handleAnimationEnd">
         <div
-          v-for="(name, index) in finalList"
-          :key="name"
+          v-for="(item, index) in items"
+          :key="item.name"
           class="pie"
           :style="getStyle(index)"
         >
           <div class="content">
             <div class="text">
-              {{ name }}
+              {{ item.name }}
             </div>
           </div>
         </div>

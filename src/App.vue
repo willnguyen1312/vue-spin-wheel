@@ -90,7 +90,7 @@ const handleClick = () => {
   if (state.value === "idle" || state.value === "finished") {
     winner.value = undefined;
     state.value = "spinning";
-    spinDeg.value += 7000 + Math.floor(Math.random() * 5000);
+    spinDeg.value += 10000 + Math.ceil(Math.random() * 360);
     spinRef.value?.classList.add("spin-animation");
   }
 };

@@ -152,6 +152,7 @@ const handleClick = () => {
   --spin-wrapper-size: 600px;
   --spinning-deg: v-bind(spinDeg + "deg");
   display: flex;
+  justify-content: center;
   gap: 100px;
 }
 

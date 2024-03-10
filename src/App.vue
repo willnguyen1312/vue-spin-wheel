@@ -31,7 +31,10 @@ const finalPeople = computed(() =>
 );
 
 watchEffect(() => {
-  localStorage.setItem("includedPeople", JSON.stringify(includedPeople.value));
+  localStorage.setItem(
+    "includedPeople",
+    JSON.stringify(includedPeople.value, null, 2)
+  );
 });
 
 const getStyle = (index: number) => {

@@ -4,6 +4,46 @@ const state = ref<"idle" | "spinning" | "finished">("idle");
 const spinDeg = ref(0);
 const currentDeg = ref(0);
 const spinRef = ref<HTMLElement>();
+const lastManualDeg = ref();
+const lastCurrentDeg = ref(0);
+
+const getDegreeFromCenter = (x: number, y: number) => {
+  const center = document.querySelector(".activator") as HTMLButtonElement;
+
+  const rect = center.getBoundingClientRect();
+  const w = rect.width / 2 + rect.x;
+  const h = rect.height / 2 + rect.y;
+
+  const deltaX = w - x;
+  const deltaY = h - y;
+
+  const rad = Math.atan2(deltaY, deltaX);
+
+  let deg = Math.round(rad * (180 / Math.PI));
+
+  if (deg < 0) {
+    deg = (deg + 360) % 360;
+  }
+
+  return deg;
+};
+
+const handlePointerDown = (e: PointerEvent) => {
+  if (state.value === "spinning") return;
+  lastManualDeg.value = getDegreeFromCenter(e.clientX, e.clientY);
+  lastCurrentDeg.value = currentDeg.value;
+};
+
+const handlePointerUp = () => (lastManualDeg.value = undefined);
+const handlePointerMove = (e: PointerEvent) => {
+  if (!lastManualDeg.value) return;
+
+  const currentDegValue = getDegreeFromCenter(e.clientX, e.clientY);
+
+  const diff = currentDegValue - lastManualDeg.value;
+
+  currentDeg.value = lastCurrentDeg.value + diff;
+};
 
 const randomHslColor = () => {
   const h = Math.floor(Math.random() * 361);
@@ -28,11 +68,11 @@ people.value = people.value.map((item) => ({
 }));
 
 const includedPeople = ref<string[]>(
-  JSON.parse(localStorage.getItem("includedPeople") ?? "[]"),
+  JSON.parse(localStorage.getItem("includedPeople") ?? "[]")
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name)),
+  people.value.filter((person) => includedPeople.value.includes(person.name))
 );
 
 const resultList = computed(() => {
@@ -47,7 +87,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2),
+    JSON.stringify(includedPeople.value, null, 2)
   );
 });
 
@@ -79,7 +119,7 @@ const handleAnimationEnd = () => {
     ];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result,
+    (person) => person.name === result
   );
   if (winnerPerson) {
     winner.value = winnerPerson;
@@ -99,7 +139,14 @@ const handleClick = () => {
 <template>
   <div class="wrapper">
     <div class="spin-wrapper">
-      <div ref="spinRef" class="spin" @animationend="handleAnimationEnd">
+      <div
+        ref="spinRef"
+        class="spin"
+        @animationend="handleAnimationEnd"
+        @pointerdown="handlePointerDown"
+        @pointerup="handlePointerUp"
+        @pointermove="handlePointerMove"
+      >
         <div
           v-for="(item, index) in finalPeople"
           :key="item.name"
@@ -185,6 +232,8 @@ const handleClick = () => {
   display: flex;
   justify-content: center;
   gap: 100px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .spin-wrapper {

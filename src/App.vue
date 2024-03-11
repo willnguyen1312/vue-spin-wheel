@@ -187,6 +187,7 @@ const handleClick = () => {
             :id="`person-${person.name}`"
             :name="`person-${person.name}`"
             type="checkbox"
+            :disabled="state === 'spinning'"
             v-model="includedPeople"
             :value="person.name"
           />

@@ -159,6 +159,7 @@ const handleClick = () => {
 }
 
 .legend {
+  text-align: center;
   font-size: large;
   font-weight: bold;
 }

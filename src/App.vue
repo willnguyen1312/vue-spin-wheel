@@ -28,11 +28,11 @@ people.value = people.value.map((item) => ({
 }));
 
 const includedPeople = ref<string[]>(
-  JSON.parse(localStorage.getItem("includedPeople") ?? "[]")
+  JSON.parse(localStorage.getItem("includedPeople") ?? "[]"),
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name))
+  people.value.filter((person) => includedPeople.value.includes(person.name)),
 );
 
 const resultList = computed(() => {
@@ -47,7 +47,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2)
+    JSON.stringify(includedPeople.value, null, 2),
   );
 });
 
@@ -79,7 +79,7 @@ const handleAnimationEnd = () => {
     ];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result
+    (person) => person.name === result,
   );
   if (winnerPerson) {
     winner.value = winnerPerson;

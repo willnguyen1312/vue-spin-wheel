@@ -34,8 +34,9 @@ const handlePointerDown = (e: PointerEvent) => {
   lastCurrentDeg.value = currentDeg.value;
 };
 
-const handlePointerUp = () => (lastManualDeg.value = undefined);
-const handlePointerMove = (e: PointerEvent) => {
+window.addEventListener("pointerup", () => (lastManualDeg.value = undefined));
+
+window.addEventListener("pointermove", (e: PointerEvent) => {
   if (!lastManualDeg.value) return;
 
   const currentDegValue = getDegreeFromCenter(e.clientX, e.clientY);
@@ -43,7 +44,7 @@ const handlePointerMove = (e: PointerEvent) => {
   const diff = currentDegValue - lastManualDeg.value;
 
   currentDeg.value = lastCurrentDeg.value + diff;
-};
+});
 
 const randomHslColor = () => {
   const h = Math.floor(Math.random() * 361);
@@ -144,8 +145,6 @@ const handleClick = () => {
         class="spin"
         @animationend="handleAnimationEnd"
         @pointerdown="handlePointerDown"
-        @pointerup="handlePointerUp"
-        @pointermove="handlePointerMove"
       >
         <div
           v-for="(item, index) in finalPeople"

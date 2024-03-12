@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect } from "vue";
-const state = ref<"idle" | "spinning" | "finished">("idle");
+const state = ref<"idle" | "spinning" | "finished" | "manual">("idle");
 const spinDeg = ref(0);
 const currentDeg = ref(0);
 const spinRef = ref<HTMLElement>();
@@ -29,12 +29,21 @@ const getDegreeFromCenter = (x: number, y: number) => {
 };
 
 const handlePointerDown = (e: PointerEvent) => {
-  if (state.value === "spinning") return;
+  if (state.value === "spinning" || state.value === "manual") return;
   lastManualDeg.value = getDegreeFromCenter(e.clientX, e.clientY);
   lastCurrentDeg.value = currentDeg.value;
 };
 
-window.addEventListener("pointerup", () => (lastManualDeg.value = undefined));
+window.addEventListener("pointerup", () => {
+  const diff = currentDeg.value - lastCurrentDeg.value;
+
+  spinDeg.value = currentDeg.value + 360 * (diff / 360);
+  spinRef.value?.classList.add("spin-animation");
+  spinRef.value?.classList.add("spin-simple-animation");
+  state.value = "manual";
+
+  lastManualDeg.value = undefined;
+});
 
 window.addEventListener("pointermove", (e: PointerEvent) => {
   if (!lastManualDeg.value) return;
@@ -117,6 +126,7 @@ const getStyle = (index: number) => {
 const handleAnimationEnd = () => {
   state.value = "finished";
   spinRef.value?.classList.remove("spin-animation");
+  spinRef.value?.classList.remove("spin-simple-animation");
   if (spinRef.value) {
     currentDeg.value = spinDeg.value % 360;
     spinDeg.value = currentDeg.value;
@@ -265,6 +275,20 @@ const handleClick = () => {
   animation-name: spinning;
 }
 
+.spin-simple-animation {
+  animation-duration: 1s;
+  animation-timing-function: ease-out;
+}
+
+@keyframes spinning {
+  from {
+    rotate: v-bind(currentDeg + "deg");
+  }
+  to {
+    rotate: var(--spinning-deg);
+  }
+}
+
 .pointer {
   right: 0;
   top: 50%;
@@ -332,15 +356,6 @@ const handleClick = () => {
   }
 
   rotate: var(--rotate-degree);
-}
-
-@keyframes spinning {
-  from {
-    rotate: v-bind(currentDeg + "deg");
-  }
-  to {
-    rotate: var(--spinning-deg);
-  }
 }
 
 .content {

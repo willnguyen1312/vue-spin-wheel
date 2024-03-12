@@ -46,27 +46,35 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
   currentDeg.value = lastCurrentDeg.value + diff;
 });
 
-const randomHslColor = () => {
-  const h = Math.floor(Math.random() * 361);
-  const s = 100;
-  const l = Math.floor(Math.random() * (100 - 50) + 50);
-  return `hsl(${h},${s}%,${l}%)`;
+const getBackgroundColor = () => {
+  const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
+    Math.random() * (100 - 50) + 50
+  )}%,${Math.random()})`;
+  const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
+    Math.random() * (100 - 50) + 50
+  )}%)`;
+
+  const gradient = `linear-gradient(${first}, ${second})`;
+  return gradient;
 };
 
 type Person = {
   name: string;
   avatarUrl: string;
-  color?: string;
+  backgroundColor?: string;
 };
 
 const people = ref<Person[]>(JSON.parse(localStorage.getItem("items") ?? "[]"));
 
 const winner = ref<Person>();
 
-people.value = people.value.map((item) => ({
-  ...item,
-  color: item.color ?? randomHslColor(),
-}));
+people.value = people.value.map(
+  (item) =>
+    ({
+      ...item,
+      backgroundColor: item.backgroundColor ?? getBackgroundColor(),
+    } satisfies Person)
+);
 
 const includedPeople = ref<string[]>(
   JSON.parse(localStorage.getItem("includedPeople") ?? "[]")
@@ -98,7 +106,7 @@ const getStyle = (index: number) => {
   const sliceDegree = 180 - rotate;
   return {
     "--slice-degree": `${sliceDegree}deg`,
-    "--background-color": finalPeople.value[index].color,
+    "--background": finalPeople.value[index].backgroundColor,
     "--rotate-degree": `${rotateDeg}deg`,
     "--rotate-content": `${-rotateDeg}deg`,
     "--text-position": "4%",
@@ -275,7 +283,7 @@ const handleClick = () => {
     border-radius: 40px 40px 0 0;
     transform-origin: 50% 100%;
     rotate: 150deg;
-    background-color: blueviolet;
+    background: blueviolet;
   }
 }
 .pointer-up {
@@ -292,7 +300,7 @@ const handleClick = () => {
   position: absolute;
   width: 30px;
   height: 30px;
-  background-color: white;
+  background: white;
   display: grid;
   place-content: center;
   font-size: 23px;
@@ -320,7 +328,7 @@ const handleClick = () => {
       calc(var(--spin-wrapper-size) / 2) 0 0;
     transform-origin: 50% 100%;
     rotate: var(--slice-degree);
-    background-color: var(--background-color);
+    background: var(--background);
   }
 
   rotate: var(--rotate-degree);

@@ -7,6 +7,12 @@ const spinRef = ref<HTMLElement>();
 const lastManualDeg = ref();
 const lastCurrentDeg = ref(0);
 
+let timer: number;
+let lastTimeStamp: number;
+let lastDeg = 0;
+const numberOfRounds = ref(1);
+const timeThreshold = 250;
+
 const getDegreeFromCenter = (x: number, y: number) => {
   const center = document.querySelector(".activator") as HTMLButtonElement;
 
@@ -32,35 +38,69 @@ const handlePointerDown = (e: PointerEvent) => {
   if (state.value === "spinning" || state.value === "manual") return;
   lastManualDeg.value = getDegreeFromCenter(e.clientX, e.clientY);
   lastCurrentDeg.value = currentDeg.value;
+
+  lastTimeStamp = Date.now();
+  lastDeg = currentDeg.value;
+
+  numberOfRounds.value = 1;
+
+  timer = setInterval(() => {
+    const currentTimeStamp = Date.now();
+    const diff = currentDeg.value - lastDeg;
+
+    if (diff === 0) {
+      lastTimeStamp = currentTimeStamp;
+      numberOfRounds.value = 1;
+    } else {
+      lastDeg = currentDeg.value;
+      lastTimeStamp = currentTimeStamp;
+    }
+  }, timeThreshold);
 };
 
 window.addEventListener("pointerup", () => {
-  const diff = currentDeg.value - lastCurrentDeg.value;
+  const degDiff = currentDeg.value - lastCurrentDeg.value;
+  const timeDiff = (Date.now() - lastTimeStamp) / timeThreshold;
+  const hasSpun = currentDeg.value - lastDeg !== 0;
 
-  spinDeg.value = currentDeg.value + 360 * (diff / 360);
-  spinRef.value?.classList.add("spin-animation");
-  spinRef.value?.classList.add("spin-simple-animation");
-  state.value = "manual";
-
+  clearInterval(timer);
   lastManualDeg.value = undefined;
+
+  if (hasSpun) {
+    spinDeg.value =
+      currentDeg.value +
+      360 * (degDiff / 360) * timeDiff * 4 * numberOfRounds.value;
+
+    spinDeg.value =
+      numberOfRounds.value > 2 ? Math.abs(spinDeg.value) : spinDeg.value;
+    spinRef.value?.classList.add("spin-animation");
+    spinRef.value?.classList.add("spin-simple-animation");
+    state.value = "manual";
+  }
 });
 
 window.addEventListener("pointermove", (e: PointerEvent) => {
   if (!lastManualDeg.value) return;
 
   const currentDegValue = getDegreeFromCenter(e.clientX, e.clientY);
-
   const diff = currentDegValue - lastManualDeg.value;
+  const newDegree = lastCurrentDeg.value + diff;
 
-  currentDeg.value = lastCurrentDeg.value + diff;
+  if (
+    (newDegree < 0 && currentDeg.value > 0) ||
+    (newDegree > 0 && currentDeg.value < 0)
+  ) {
+    numberOfRounds.value += 0.5;
+  }
+  currentDeg.value = newDegree;
 });
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -82,15 +122,15 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: item.backgroundColor ?? getBackgroundColor(),
-    } satisfies Person)
+    }) satisfies Person,
 );
 
 const includedPeople = ref<string[]>(
-  JSON.parse(localStorage.getItem("includedPeople") ?? "[]")
+  JSON.parse(localStorage.getItem("includedPeople") ?? "[]"),
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name))
+  people.value.filter((person) => includedPeople.value.includes(person.name)),
 );
 
 const resultList = computed(() => {
@@ -105,7 +145,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2)
+    JSON.stringify(includedPeople.value, null, 2),
   );
 });
 
@@ -124,7 +164,6 @@ const getStyle = (index: number) => {
 };
 
 const handleAnimationEnd = () => {
-  state.value = "finished";
   spinRef.value?.classList.remove("spin-animation");
   spinRef.value?.classList.remove("spin-simple-animation");
   if (spinRef.value) {
@@ -138,11 +177,13 @@ const handleAnimationEnd = () => {
     ];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result
+    (person) => person.name === result,
   );
   if (winnerPerson) {
     winner.value = winnerPerson;
   }
+
+  state.value = "finished";
 };
 
 const handleClick = () => {
@@ -178,7 +219,7 @@ const handleClick = () => {
         </div>
 
         <button
-          :disabled="state === 'spinning'"
+          :disabled="state === 'spinning' || state === 'manual'"
           @click="handleClick"
           class="activator"
         >
@@ -214,7 +255,12 @@ const handleClick = () => {
   </div>
 
   <div class="winner-wrapper">
-    <img v-if="winner" :src="winner.avatarUrl" class="winner" />
+    <img
+      v-if="winner"
+      :alt="winner.name"
+      :src="winner.avatarUrl"
+      class="winner"
+    />
   </div>
 </template>
 
@@ -276,8 +322,8 @@ const handleClick = () => {
 }
 
 .spin-simple-animation {
-  animation-duration: 1s;
-  animation-timing-function: ease-out;
+  animation-duration: v-bind(numberOfRounds * 1.5 + "s");
+  animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
 @keyframes spinning {
@@ -298,6 +344,7 @@ const handleClick = () => {
   overflow: hidden;
   position: absolute;
   transform-origin: 50% 100%;
+  pointer-events: none;
 
   &:before {
     height: inherit;

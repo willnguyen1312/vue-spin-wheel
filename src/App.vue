@@ -97,10 +97,10 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -122,15 +122,15 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: item.backgroundColor ?? getBackgroundColor(),
-    }) satisfies Person,
+    } satisfies Person)
 );
 
 const includedPeople = ref<string[]>(
-  JSON.parse(localStorage.getItem("includedPeople") ?? "[]"),
+  JSON.parse(localStorage.getItem("includedPeople") ?? "[]")
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name)),
+  people.value.filter((person) => includedPeople.value.includes(person.name))
 );
 
 const resultList = computed(() => {
@@ -145,7 +145,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2),
+    JSON.stringify(includedPeople.value, null, 2)
   );
 });
 
@@ -177,7 +177,7 @@ const handleAnimationEnd = () => {
     ];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result,
+    (person) => person.name === result
   );
   if (winnerPerson) {
     winner.value = winnerPerson;
@@ -220,7 +220,7 @@ const handleClick = () => {
 
         <button
           :disabled="state === 'spinning' || state === 'manual'"
-          @click="handleClick"
+          @click.stop.prevent="handleClick"
           class="activator"
         >
           🌀

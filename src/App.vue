@@ -8,6 +8,14 @@ const spinRef = ref<HTMLElement>();
 const lastManualDeg = ref();
 const lastCurrentDeg = ref(0);
 
+function preventDefault(event: Event) {
+  event.preventDefault();
+}
+
+window.addEventListener("DOMMouseScroll", preventDefault);
+window.addEventListener("wheel", preventDefault, { passive: false });
+window.addEventListener("touchmove", preventDefault, { passive: false });
+
 let timer: number;
 let lastTimeStamp: number;
 let lastDeg = 0;
@@ -37,7 +45,8 @@ const getDegreeFromCenter = (x: number, y: number) => {
 };
 
 const handlePointerDown = (e: PointerEvent) => {
-  e.preventDefault();
+  preventDefault(e);
+
   if (state.value === "spinning" || state.value === "manual") return;
 
   lastManualDeg.value = getDegreeFromCenter(e.clientX, e.clientY);
@@ -57,14 +66,15 @@ const handlePointerDown = (e: PointerEvent) => {
       direction = "none";
     } else {
       lastDeg = currentDeg.value;
-      lastTimeStamp = currentTimeStamp;
     }
   };
 
   timer = setInterval(runMe, timeThreshold);
 };
 
-window.addEventListener("pointerup", () => {
+window.addEventListener("pointerup", (e: PointerEvent) => {
+  preventDefault(e);
+
   if (state.value === "spinning" || state.value === "manual") return;
   const degDiff = currentDeg.value - lastCurrentDeg.value;
   const timeDiff = (Date.now() - lastTimeStamp) / timeThreshold;
@@ -74,23 +84,24 @@ window.addEventListener("pointerup", () => {
   lastManualDeg.value = undefined;
 
   if (hasSpun) {
+    spinRef.value?.classList.add("spin-animation");
+    spinRef.value?.classList.add("spin-simple-animation");
     spinDeg.value =
       currentDeg.value +
-      360 * (degDiff / 360) * timeDiff * numberOfRounds.value * 4;
+      360 * (degDiff / 360) * timeDiff * numberOfRounds.value;
 
     spinDeg.value =
       direction === "clockwise"
         ? Math.abs(spinDeg.value)
         : -Math.abs(spinDeg.value);
 
-    spinRef.value?.classList.add("spin-animation");
-    spinRef.value?.classList.add("spin-simple-animation");
     state.value = "manual";
   }
 });
 
 window.addEventListener("pointermove", (e: PointerEvent) => {
-  e.preventDefault();
+  preventDefault(e);
+
   if (
     state.value === "spinning" ||
     state.value === "manual" ||
@@ -117,10 +128,9 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
 });
 
 window.addEventListener("keydown", (e: KeyboardEvent) => {
-  e.preventDefault();
   // Check if Command or Control key is pressed with s letter
   if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-    e.preventDefault();
+    preventDefault(e);
 
     // Update URL to include search query in URL
     const decodedState = encode({
@@ -238,6 +248,7 @@ const handleAnimationEnd = () => {
 
   state.value = "finished";
   direction = "none";
+  numberOfRounds.value = 1;
 
   showWinner();
 };
@@ -378,7 +389,7 @@ const handleClick = () => {
 }
 
 .spin-simple-animation {
-  animation-duration: v-bind(numberOfRounds * 1.5 + "s");
+  animation-duration: v-bind(numberOfRounds * 2 + "s");
   animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
@@ -425,17 +436,18 @@ const handleClick = () => {
   border-color: transparent;
   cursor: pointer;
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   background: white;
   display: grid;
   place-content: center;
-  font-size: 23px;
+  font-size: 20px;
+  text-align: center;
   z-index: 1000;
 
   top: 50%;
   left: 50%;
-  border-radius: 50%;
+  border-radius: 99999px;
   transform: translate(-50%, -50%);
 }
 

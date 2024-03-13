@@ -16,12 +16,11 @@ window.addEventListener("DOMMouseScroll", preventDefault);
 window.addEventListener("wheel", preventDefault, { passive: false });
 window.addEventListener("touchmove", preventDefault, { passive: false });
 
-let timer: number;
 let lastTimeStamp: number;
 let lastDeg = 0;
 let direction: "clockwise" | "counter-clockwise" | "none" = "none";
 const numberOfRounds = ref(1);
-const timeThreshold = 250;
+const timeThreshold = 150;
 
 const getDegreeFromCenter = (x: number, y: number) => {
   const center = document.querySelector(".activator") as HTMLButtonElement;
@@ -55,21 +54,6 @@ const handlePointerDown = (e: PointerEvent) => {
   lastTimeStamp = Date.now();
   lastDeg = currentDeg.value;
   numberOfRounds.value = 1;
-
-  const runMe = () => {
-    const currentTimeStamp = Date.now();
-    const diff = currentDeg.value - lastDeg;
-
-    if (diff === 0) {
-      lastTimeStamp = currentTimeStamp;
-      numberOfRounds.value = 1;
-      direction = "none";
-    } else {
-      lastDeg = currentDeg.value;
-    }
-  };
-
-  timer = setInterval(runMe, timeThreshold);
 };
 
 window.addEventListener("pointerup", (e: PointerEvent) => {
@@ -80,7 +64,6 @@ window.addEventListener("pointerup", (e: PointerEvent) => {
   const timeDiff = (Date.now() - lastTimeStamp) / timeThreshold;
   const hasSpun = currentDeg.value - lastDeg !== 0;
 
-  clearInterval(timer);
   lastManualDeg.value = undefined;
 
   if (hasSpun) {
@@ -99,6 +82,23 @@ window.addEventListener("pointerup", (e: PointerEvent) => {
   }
 });
 
+const runMe = () => {
+  const currentTimeStamp = Date.now();
+  const diff = currentDeg.value - lastDeg;
+
+  if (direction === "none" && diff !== 0) {
+    direction = diff > 0 ? "clockwise" : "counter-clockwise";
+  }
+
+  if (diff === 0) {
+    lastTimeStamp = currentTimeStamp;
+    numberOfRounds.value = 1;
+    direction = "none";
+  } else {
+    lastDeg = currentDeg.value;
+  }
+};
+
 window.addEventListener("pointermove", (e: PointerEvent) => {
   preventDefault(e);
 
@@ -109,10 +109,7 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
   )
     return;
 
-  const diff = currentDeg.value - lastDeg;
-  if (direction === "none" && diff !== 0) {
-    direction = diff > 0 ? "clockwise" : "counter-clockwise";
-  }
+  runMe();
 
   const currentDegValue = getDegreeFromCenter(e.clientX, e.clientY);
   const diffDeg = currentDegValue - lastManualDeg.value;
@@ -146,10 +143,10 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -182,13 +179,13 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: getBackgroundColor(),
-    } satisfies Person)
+    }) satisfies Person,
 );
 
 const includedPeople = ref<string[]>(initialIncludedPeople);
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name))
+  people.value.filter((person) => includedPeople.value.includes(person.name)),
 );
 
 const resultList = computed(() => {
@@ -203,7 +200,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2)
+    JSON.stringify(includedPeople.value, null, 2),
   );
   localStorage.setItem("items", JSON.stringify(people.value, null, 2));
 });
@@ -231,7 +228,7 @@ const showWinner = () => {
       : resultList.value[index];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result
+    (person) => person.name === result,
   );
   if (winnerPerson) {
     winner.value = winnerPerson;

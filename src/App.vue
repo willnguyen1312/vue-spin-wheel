@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect } from "vue";
+import { decode, encode } from "./utils";
 const state = ref<"idle" | "spinning" | "finished" | "manual">("idle");
 const spinDeg = ref(0);
 const currentDeg = ref(0);
@@ -104,12 +105,29 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
   currentDeg.value = newDegree;
 });
 
+window.addEventListener("keydown", (e: KeyboardEvent) => {
+  // Check if Command or Control key is pressed with s letter
+  if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+    e.preventDefault();
+
+    // Update URL to include search query in URL
+    const decodedState = encode({
+      people: people.value,
+      includedPeople: includedPeople.value,
+    });
+
+    history.replaceState(null, "", `?state=${decodedState}`);
+    // Copy url to clipboard
+    navigator.clipboard.writeText(window.location.href);
+  }
+});
+
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -122,7 +140,18 @@ type Person = {
   backgroundColor?: string;
 };
 
-const people = ref<Person[]>(JSON.parse(localStorage.getItem("items") ?? "[]"));
+// Check if URL has state query
+const urlParams = new URLSearchParams(window.location.search);
+const stateQuery = urlParams.get("state") ?? "";
+const decodedState = decode(stateQuery) ?? {};
+
+const initialPeople: Person[] =
+  decodedState.people ?? JSON.parse(localStorage.getItem("items") ?? "[]");
+const initialIncludedPeople: string[] =
+  decodedState.includedPeople ??
+  JSON.parse(localStorage.getItem("includedPeople") ?? "[]");
+
+const people = ref<Person[]>(initialPeople);
 
 const winner = ref<Person>();
 
@@ -131,15 +160,13 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: item.backgroundColor ?? getBackgroundColor(),
-    } satisfies Person)
+    }) satisfies Person,
 );
 
-const includedPeople = ref<string[]>(
-  JSON.parse(localStorage.getItem("includedPeople") ?? "[]")
-);
+const includedPeople = ref<string[]>(initialIncludedPeople);
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name))
+  people.value.filter((person) => includedPeople.value.includes(person.name)),
 );
 
 const resultList = computed(() => {
@@ -154,8 +181,9 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2)
+    JSON.stringify(includedPeople.value, null, 2),
   );
+  localStorage.setItem("items", JSON.stringify(people.value, null, 2));
 });
 
 const getStyle = (index: number) => {
@@ -187,7 +215,7 @@ const handleAnimationEnd = () => {
 
   if (state.value === "spinning") {
     const winnerPerson = finalPeople.value.find(
-      (person) => person.name === result
+      (person) => person.name === result,
     );
     if (winnerPerson) {
       winner.value = winnerPerson;

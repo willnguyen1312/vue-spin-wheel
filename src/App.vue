@@ -10,6 +10,7 @@ const lastCurrentDeg = ref(0);
 let timer: number;
 let lastTimeStamp: number;
 let lastDeg = 0;
+let direction: "clockwise" | "counter-clockwise" | "none" = "none";
 const numberOfRounds = ref(1);
 const timeThreshold = 250;
 
@@ -48,9 +49,14 @@ const handlePointerDown = (e: PointerEvent) => {
     const currentTimeStamp = Date.now();
     const diff = currentDeg.value - lastDeg;
 
+    if (direction === "none" && diff !== 0) {
+      direction = diff > 0 ? "clockwise" : "counter-clockwise";
+    }
+
     if (diff === 0) {
       lastTimeStamp = currentTimeStamp;
       numberOfRounds.value = 1;
+      direction = "none";
     } else {
       lastDeg = currentDeg.value;
       lastTimeStamp = currentTimeStamp;
@@ -67,12 +73,11 @@ window.addEventListener("pointerup", () => {
   lastManualDeg.value = undefined;
 
   if (hasSpun) {
+    const factor = direction === "clockwise" ? 1 : -1;
     spinDeg.value =
       currentDeg.value +
-      360 * (degDiff / 360) * timeDiff * 4 * numberOfRounds.value;
+      360 * (degDiff / 360) * timeDiff * 2 * numberOfRounds.value * factor;
 
-    spinDeg.value =
-      numberOfRounds.value > 2 ? Math.abs(spinDeg.value) : spinDeg.value;
     spinRef.value?.classList.add("spin-animation");
     spinRef.value?.classList.add("spin-simple-animation");
     state.value = "manual";
@@ -176,11 +181,13 @@ const handleAnimationEnd = () => {
       Math.floor(spinDeg.value / (360 / resultList.value.length))
     ];
 
-  const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result
-  );
-  if (winnerPerson) {
-    winner.value = winnerPerson;
+  if (state.value === "spinning") {
+    const winnerPerson = finalPeople.value.find(
+      (person) => person.name === result
+    );
+    if (winnerPerson) {
+      winner.value = winnerPerson;
+    }
   }
 
   state.value = "finished";
@@ -219,7 +226,7 @@ const handleClick = () => {
         </div>
 
         <button
-          :disabled="state === 'spinning' || state === 'manual'"
+          :disabled="state === 'spinning'"
           @click.stop.prevent="handleClick"
           class="activator"
         >
@@ -322,7 +329,7 @@ const handleClick = () => {
 }
 
 .spin-simple-animation {
-  animation-duration: v-bind(numberOfRounds * 1.5 + "s");
+  animation-duration: v-bind(numberOfRounds * 1.25 + "s");
   animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 

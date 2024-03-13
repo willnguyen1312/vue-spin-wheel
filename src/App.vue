@@ -73,10 +73,14 @@ window.addEventListener("pointerup", () => {
   lastManualDeg.value = undefined;
 
   if (hasSpun) {
-    const factor = direction === "clockwise" ? 1 : -1;
     spinDeg.value =
       currentDeg.value +
-      360 * (degDiff / 360) * timeDiff * 2 * numberOfRounds.value * factor;
+      360 * (degDiff / 360) * timeDiff * 4 * numberOfRounds.value;
+
+    spinDeg.value =
+      direction === "clockwise"
+        ? Math.abs(spinDeg.value)
+        : -Math.abs(spinDeg.value);
 
     spinRef.value?.classList.add("spin-animation");
     spinRef.value?.classList.add("spin-simple-animation");
@@ -191,6 +195,7 @@ const handleAnimationEnd = () => {
   }
 
   state.value = "finished";
+  direction = "none";
 };
 
 const handleClick = () => {

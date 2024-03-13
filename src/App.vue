@@ -38,21 +38,17 @@ const getDegreeFromCenter = (x: number, y: number) => {
 
 const handlePointerDown = (e: PointerEvent) => {
   if (state.value === "spinning" || state.value === "manual") return;
+
   lastManualDeg.value = getDegreeFromCenter(e.clientX, e.clientY);
   lastCurrentDeg.value = currentDeg.value;
 
   lastTimeStamp = Date.now();
   lastDeg = currentDeg.value;
-
   numberOfRounds.value = 1;
 
-  timer = setInterval(() => {
+  const runMe = () => {
     const currentTimeStamp = Date.now();
     const diff = currentDeg.value - lastDeg;
-
-    if (direction === "none" && diff !== 0) {
-      direction = diff > 0 ? "clockwise" : "counter-clockwise";
-    }
 
     if (diff === 0) {
       lastTimeStamp = currentTimeStamp;
@@ -62,10 +58,13 @@ const handlePointerDown = (e: PointerEvent) => {
       lastDeg = currentDeg.value;
       lastTimeStamp = currentTimeStamp;
     }
-  }, timeThreshold);
+  };
+
+  timer = setInterval(runMe, timeThreshold);
 };
 
 window.addEventListener("pointerup", () => {
+  if (state.value === "spinning" || state.value === "manual") return;
   const degDiff = currentDeg.value - lastCurrentDeg.value;
   const timeDiff = (Date.now() - lastTimeStamp) / timeThreshold;
   const hasSpun = currentDeg.value - lastDeg !== 0;
@@ -76,7 +75,7 @@ window.addEventListener("pointerup", () => {
   if (hasSpun) {
     spinDeg.value =
       currentDeg.value +
-      360 * (degDiff / 360) * timeDiff * 4 * numberOfRounds.value;
+      360 * (degDiff / 360) * timeDiff * numberOfRounds.value * 4;
 
     spinDeg.value =
       direction === "clockwise"
@@ -90,11 +89,21 @@ window.addEventListener("pointerup", () => {
 });
 
 window.addEventListener("pointermove", (e: PointerEvent) => {
-  if (!lastManualDeg.value) return;
+  if (
+    state.value === "spinning" ||
+    state.value === "manual" ||
+    !lastManualDeg.value
+  )
+    return;
+
+  const diff = currentDeg.value - lastDeg;
+  if (direction === "none" && diff !== 0) {
+    direction = diff > 0 ? "clockwise" : "counter-clockwise";
+  }
 
   const currentDegValue = getDegreeFromCenter(e.clientX, e.clientY);
-  const diff = currentDegValue - lastManualDeg.value;
-  const newDegree = lastCurrentDeg.value + diff;
+  const diffDeg = currentDegValue - lastManualDeg.value;
+  const newDegree = lastCurrentDeg.value + diffDeg;
 
   if (
     (newDegree < 0 && currentDeg.value > 0) ||
@@ -200,6 +209,22 @@ const getStyle = (index: number) => {
   };
 };
 
+const showWinner = () => {
+  const index = Math.floor(spinDeg.value / (360 / resultList.value.length));
+
+  const result =
+    index < 0
+      ? resultList.value[resultList.value.length + index]
+      : resultList.value[index];
+
+  const winnerPerson = finalPeople.value.find(
+    (person) => person.name === result,
+  );
+  if (winnerPerson) {
+    winner.value = winnerPerson;
+  }
+};
+
 const handleAnimationEnd = () => {
   spinRef.value?.classList.remove("spin-animation");
   spinRef.value?.classList.remove("spin-simple-animation");
@@ -208,22 +233,10 @@ const handleAnimationEnd = () => {
     spinDeg.value = currentDeg.value;
   }
 
-  const result =
-    resultList.value[
-      Math.floor(spinDeg.value / (360 / resultList.value.length))
-    ];
-
-  if (state.value === "spinning") {
-    const winnerPerson = finalPeople.value.find(
-      (person) => person.name === result,
-    );
-    if (winnerPerson) {
-      winner.value = winnerPerson;
-    }
-  }
-
   state.value = "finished";
   direction = "none";
+
+  showWinner();
 };
 
 const handleClick = () => {
@@ -362,7 +375,7 @@ const handleClick = () => {
 }
 
 .spin-simple-animation {
-  animation-duration: v-bind(numberOfRounds * 1.25 + "s");
+  animation-duration: v-bind(numberOfRounds * 1.5 + "s");
   animation-timing-function: cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 

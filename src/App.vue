@@ -181,7 +181,7 @@ people.value = people.value.map(
   (item) =>
     ({
       ...item,
-      backgroundColor: item.backgroundColor ?? getBackgroundColor(),
+      backgroundColor: getBackgroundColor(),
     } satisfies Person)
 );
 

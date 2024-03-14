@@ -441,6 +441,7 @@ const handleClick = () => {
   font-size: 20px;
   text-align: center;
   z-index: 1000;
+  color: inherit;
 
   top: 50%;
   left: 50%;

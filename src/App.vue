@@ -66,7 +66,7 @@ window.addEventListener("pointerup", (e: PointerEvent) => {
 
   lastManualDeg.value = undefined;
 
-  if (hasSpun) {
+  if (hasSpun && direction !== "none") {
     spinRef.value?.classList.add("spin-animation");
     spinRef.value?.classList.add("spin-simple-animation");
     spinDeg.value =
@@ -143,10 +143,10 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -179,13 +179,13 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: getBackgroundColor(),
-    }) satisfies Person,
+    } satisfies Person)
 );
 
 const includedPeople = ref<string[]>(initialIncludedPeople);
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name)),
+  people.value.filter((person) => includedPeople.value.includes(person.name))
 );
 
 const resultList = computed(() => {
@@ -200,7 +200,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2),
+    JSON.stringify(includedPeople.value, null, 2)
   );
   localStorage.setItem("items", JSON.stringify(people.value, null, 2));
 });
@@ -228,7 +228,7 @@ const showWinner = () => {
       : resultList.value[index];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result,
+    (person) => person.name === result
   );
   if (winnerPerson) {
     winner.value = winnerPerson;

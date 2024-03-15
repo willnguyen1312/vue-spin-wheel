@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watchEffect } from "vue";
-import { decode, encode } from "./utils";
+import { ref, computed, watchEffect, onMounted, nextTick } from "vue";
+import { createAnimation, decode, encode } from "./utils";
 const state = ref<"idle" | "spinning" | "finished" | "manual">("idle");
 const spinDeg = ref(0);
 const currentDeg = ref(0);
 const spinRef = ref<HTMLElement>();
 const lastManualDeg = ref();
 const lastCurrentDeg = ref(0);
+const animationOverFlow = ref<"hidden" | "visible">("hidden");
 
 function preventDefault(event: Event) {
   event.preventDefault();
@@ -15,6 +16,10 @@ function preventDefault(event: Event) {
 window.addEventListener("DOMMouseScroll", preventDefault);
 window.addEventListener("wheel", preventDefault, { passive: false });
 window.addEventListener("touchmove", preventDefault, { passive: false });
+
+onMounted(() => {
+  createAnimation();
+});
 
 let lastTimeStamp: number;
 let lastDeg = 0;
@@ -44,6 +49,7 @@ const getDegreeFromCenter = (x: number, y: number) => {
 };
 
 const handlePointerDown = (e: PointerEvent) => {
+  animationOverFlow.value = "hidden";
   preventDefault(e);
 
   if (state.value === "spinning" || state.value === "manual") return;
@@ -219,7 +225,7 @@ const getStyle = (index: number) => {
   };
 };
 
-const showWinner = () => {
+const showWinner = async () => {
   const index = Math.floor(spinDeg.value / (360 / resultList.value.length));
 
   const result =
@@ -232,6 +238,9 @@ const showWinner = () => {
   );
   if (winnerPerson) {
     winner.value = winnerPerson;
+
+    await nextTick();
+    animationOverFlow.value = "visible";
   }
 };
 
@@ -318,6 +327,7 @@ const handleClick = () => {
     </fieldset>
   </div>
 
+  <div id="animate"></div>
   <div class="winner-wrapper">
     <img
       v-if="winner"
@@ -329,6 +339,20 @@ const handleClick = () => {
 </template>
 
 <style>
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+#animate {
+  margin: 0 auto;
+  width: 20px;
+  overflow: v-bind(animationOverFlow);
+  position: relative;
+}
+
 .fieldset {
   height: fit-content;
 }
@@ -343,7 +367,7 @@ const handleClick = () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 100px;
+  width: 80;
 }
 
 .member-wrapper {
@@ -500,7 +524,7 @@ const handleClick = () => {
 }
 
 .winner-wrapper {
-  padding-top: 32px;
+  padding-top: 120px;
   width: 100vw;
   display: grid;
   place-content: center;

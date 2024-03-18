@@ -312,7 +312,9 @@ const handleClick = () => {
           :key="personIdx"
           class="member-wrapper"
         >
-          <label :for="`person-${person.name}`">{{ person.name }}</label>
+          <label class="member-label" :for="`person-${person.name}`">{{
+            person.name
+          }}</label>
 
           <input
             :id="`person-${person.name}`"
@@ -375,6 +377,10 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: large;
+}
+
+.member-label {
+  cursor: pointer;
 }
 
 .wrapper {

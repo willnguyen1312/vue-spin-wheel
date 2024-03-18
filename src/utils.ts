@@ -42,98 +42,102 @@ export function createAnimation() {
     "😇",
     "🤯",
   ];
-  const circles: any = [];
+  const circles: Array<{
+    update: () => void;
+  }> = [];
 
   for (let i = 0; i < 14; i++) {
     addCircle(
       i * 150,
       [10 + 0, 300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
     addCircle(
       i * 150,
       [10 + 0, -300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
     addCircle(
       i * 150,
       [10 - 200, -300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
     addCircle(
       i * 150,
       [10 + 200, 300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
     addCircle(
       i * 150,
       [10 - 400, -300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
     addCircle(
       i * 150,
       [10 + 400, 300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
     addCircle(
       i * 150,
       [10 - 600, -300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
     addCircle(
       i * 150,
       [10 + 600, 300],
-      emoji[Math.floor(Math.random() * emoji.length)],
+      emoji[Math.floor(Math.random() * emoji.length)]
     );
   }
 
-  function addCircle(delay: any, range: any, color: any) {
+  function addCircle(delay: number, range: [number, number], emoji: string) {
     setTimeout(function () {
-      // @ts-ignore
-      const c = new Circle(
+      const circle = makeCircle(
         range[0] + Math.random() * range[1],
         80 + Math.random() * 4,
-        color,
+        emoji,
         {
           x: -0.15 + Math.random() * 0.3,
           y: 1 + Math.random() * 1,
         },
-        range,
+        range
       );
-      circles.push(c);
+      circles.push(circle);
     }, delay);
   }
 
-  function Circle(this: any, x: any, y: any, c: any, v: any, range: any) {
-    var _this = this;
-    this.x = x;
-    this.y = y;
-    this.color = c;
-    this.v = v;
-    this.range = range;
-    this.element = document.createElement("span");
-    this.element.style.opacity = 0;
-    this.element.style.position = "absolute";
-    this.element.style.fontSize = "26px";
-    this.element.style.color =
-      "hsl(" + ((Math.random() * 360) | 0) + ",80%,50%)";
-    this.element.innerHTML = c;
-    container?.appendChild(this.element);
+  function makeCircle(
+    initialX: number,
+    initialY: number,
+    emoji: string,
+    velocity: {
+      x: number;
+      y: number;
+    },
+    range: [number, number]
+  ) {
+    let x = initialX;
+    let y = initialY;
+    let element = document.createElement("span");
+    element.style.opacity = "0";
+    element.style.position = "absolute";
+    element.style.fontSize = "26px";
+    element.style.color = "hsl(" + ((Math.random() * 360) | 0) + ",80%,50%)";
+    element.innerHTML = emoji;
+    container?.appendChild(element);
 
-    this.update = function () {
-      if (_this.y > 800) {
-        _this.y = 80 + Math.random() * 4;
-        _this.x = _this.range[0] + Math.random() * _this.range[1];
+    const update = function () {
+      if (y > 800) {
+        y = 80 + Math.random() * 4;
+        x = range[0] + Math.random() * range[1];
       }
-      _this.y += _this.v.y;
-      _this.x += _this.v.x;
-      this.element.style.opacity = 1;
-      this.element.style.transform =
-        "translate3d(" + _this.x + "px, " + _this.y + "px, 0px)";
-      this.element.style.webkitTransform =
-        "translate3d(" + _this.x + "px, " + _this.y + "px, 0px)";
-      this.element.style.mozTransform =
-        "translate3d(" + _this.x + "px, " + _this.y + "px, 0px)";
+      y += velocity.y;
+      x += velocity.x;
+      element.style.opacity = "1";
+      element.style.transform = "translate3d(" + x + "px, " + y + "px, 0px)";
+    };
+
+    return {
+      update,
     };
   }
 

@@ -386,6 +386,7 @@ body {
   gap: 100px;
   cursor: pointer;
   user-select: none;
+  padding-top: 16px;
 }
 
 .spin-wrapper {

@@ -316,29 +316,26 @@ const handleClick = () => {
       <div class="pointer pointer-down"></div>
     </div>
 
-    <fieldset class="fieldset">
-      <legend class="legend">Members</legend>
-      <div class="members">
-        <div
-          v-for="(person, personIdx) in people"
-          :key="personIdx"
-          class="member-wrapper"
-        >
-          <label class="member-label" :for="`person-${person.name}`">{{
-            person.name
-          }}</label>
+    <div class="members">
+      <div
+        v-for="(person, personIdx) in people"
+        :key="personIdx"
+        class="member-wrapper"
+      >
+        <label class="member-label" :for="`person-${person.name}`">{{
+          person.name
+        }}</label>
 
-          <input
-            :id="`person-${person.name}`"
-            :name="`person-${person.name}`"
-            type="checkbox"
-            :disabled="state === 'spinning'"
-            v-model="includedPeople"
-            :value="person.name"
-          />
-        </div>
+        <input
+          :id="`person-${person.name}`"
+          :name="`person-${person.name}`"
+          type="checkbox"
+          :disabled="state === 'spinning'"
+          v-model="includedPeople"
+          :value="person.name"
+        />
       </div>
-    </fieldset>
+    </div>
   </div>
 
   <div id="animate"></div>
@@ -367,25 +364,15 @@ body {
   position: relative;
 }
 
-.fieldset {
-  height: fit-content;
-}
-
-.legend {
-  text-align: center;
-  font-size: large;
-  font-weight: bold;
-}
-
 .members {
+  height: 600px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  width: 80;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .member-wrapper {
-  width: 100%;
   display: flex;
   justify-content: space-between;
   font-size: large;

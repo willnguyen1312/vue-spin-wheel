@@ -212,8 +212,10 @@ watchEffect(() => {
     "items",
     JSON.stringify(
       people.value.map((person) => {
-        delete person.backgroundColor;
-        return person;
+        return {
+          name: person.name,
+          avatarUrl: person.avatarUrl,
+        };
       }),
       null,
       2

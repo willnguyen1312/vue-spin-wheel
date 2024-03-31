@@ -208,7 +208,17 @@ watchEffect(() => {
     "includedPeople",
     JSON.stringify(includedPeople.value, null, 2)
   );
-  localStorage.setItem("items", JSON.stringify(people.value, null, 2));
+  localStorage.setItem(
+    "items",
+    JSON.stringify(
+      people.value.map((person) => {
+        delete person.backgroundColor;
+        return person;
+      }),
+      null,
+      2
+    )
+  );
 });
 
 const getStyle = (index: number) => {

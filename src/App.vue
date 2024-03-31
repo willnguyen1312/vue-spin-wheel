@@ -149,10 +149,10 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -187,11 +187,11 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: getBackgroundColor(),
-    }) satisfies Person,
+    } satisfies Person)
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name)),
+  people.value.filter((person) => includedPeople.value.includes(person.name))
 );
 
 const resultList = computed(() => {
@@ -206,7 +206,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2),
+    JSON.stringify(includedPeople.value, null, 2)
   );
   localStorage.setItem("items", JSON.stringify(people.value, null, 2));
 });
@@ -234,7 +234,7 @@ const showWinner = async () => {
       : resultList.value[index];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result,
+    (person) => person.name === result
   );
   if (winnerPerson) {
     winner.value = winnerPerson;
@@ -390,7 +390,6 @@ body {
   display: flex;
   justify-content: center;
   gap: 100px;
-  cursor: pointer;
   user-select: none;
   padding-top: 16px;
 }
@@ -402,12 +401,14 @@ body {
 }
 
 .spin {
+  clip-path: circle(50%);
+  cursor: pointer;
   rotate: v-bind(currentDeg + "deg");
   width: 100%;
   height: 100%;
   position: relative;
 
-  animation-duration: 14s;
+  animation-duration: 10s;
   animation-fill-mode: forwards;
   animation-timing-function: cubic-bezier(0.44, -0.205, 0, 1.13);
 }

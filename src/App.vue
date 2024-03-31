@@ -407,7 +407,7 @@ body {
   height: 100%;
   position: relative;
 
-  animation-duration: 10s;
+  animation-duration: 7s;
   animation-fill-mode: forwards;
   animation-timing-function: cubic-bezier(0.44, -0.205, 0, 1.13);
 }

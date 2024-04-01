@@ -131,10 +131,8 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
 });
 
 window.addEventListener("keydown", (e: KeyboardEvent) => {
-  // Check if Command or Control key is pressed with s letter
   if ((e.metaKey || e.ctrlKey) && e.key === "s") {
-    preventDefault(e);
-
+    e.preventDefault();
     // Update URL to include search query in URL
     const decodedState = encode({
       people: people.value,
@@ -144,6 +142,20 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
     history.replaceState(null, "", `?state=${decodedState}`);
     // Copy url to clipboard
     navigator.clipboard.writeText(window.location.href);
+  }
+
+  if ((e.metaKey || e.ctrlKey) && e.key === "a") {
+    e.preventDefault();
+    // Toggle all people
+    const isAllSelected = people.value.every((person) =>
+      includedPeople.value.includes(person.name)
+    );
+
+    if (isAllSelected) {
+      includedPeople.value = [];
+    } else {
+      includedPeople.value = people.value.map((person) => person.name);
+    }
   }
 });
 

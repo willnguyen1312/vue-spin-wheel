@@ -412,9 +412,10 @@ body {
 }
 
 .spin {
+  will-change: transform;
   clip-path: circle(50%);
   cursor: pointer;
-  rotate: v-bind(currentDeg + "deg");
+  transform: rotate(v-bind(currentDeg + "deg"));
   width: 100%;
   height: 100%;
   position: relative;

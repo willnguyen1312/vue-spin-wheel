@@ -148,7 +148,7 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
     e.preventDefault();
     // Toggle all people
     const isAllSelected = people.value.every((person) =>
-      includedPeople.value.includes(person.name)
+      includedPeople.value.includes(person.name),
     );
 
     if (isAllSelected) {
@@ -161,10 +161,10 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -199,11 +199,11 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: getBackgroundColor(),
-    } satisfies Person)
+    }) satisfies Person,
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name))
+  people.value.filter((person) => includedPeople.value.includes(person.name)),
 );
 
 const resultList = computed(() => {
@@ -218,7 +218,7 @@ const resultList = computed(() => {
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2)
+    JSON.stringify(includedPeople.value, null, 2),
   );
   localStorage.setItem(
     "items",
@@ -230,8 +230,8 @@ watchEffect(() => {
         };
       }),
       null,
-      2
-    )
+      2,
+    ),
   );
 });
 
@@ -261,7 +261,7 @@ const showWinner = async () => {
       : resultList.value[index];
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result
+    (person) => person.name === result,
   );
   if (winnerPerson) {
     winner.value = winnerPerson;

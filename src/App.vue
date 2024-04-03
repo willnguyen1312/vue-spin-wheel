@@ -250,7 +250,10 @@ const getStyle = (index: number) => {
 };
 
 const showWinner = async () => {
-  const index = Math.floor(spinDeg.value / (360 / resultList.value.length));
+  const length = includedPeople.value.length;
+  const index =
+    Math.floor(spinDeg.value / (360 / resultList.value.length)) -
+    Math.floor(length / 2);
 
   const result =
     index < 0
@@ -296,6 +299,9 @@ const handleClick = () => {
 <template>
   <div class="wrapper">
     <div class="spin-wrapper">
+      <div class="pointer pointer-up"></div>
+      <div class="pointer pointer-down"></div>
+
       <div
         ref="spinRef"
         class="spin"
@@ -323,9 +329,6 @@ const handleClick = () => {
           🌀
         </button>
       </div>
-
-      <div class="pointer pointer-up"></div>
-      <div class="pointer pointer-down"></div>
     </div>
 
     <div class="members">
@@ -444,9 +447,9 @@ body {
 }
 
 .pointer {
-  right: 0;
+  transform: scaleX(-1);
+  left: 0;
   top: 50%;
-  transform: translate(50%, -100%);
   height: 40px;
   width: 80px;
   overflow: hidden;
@@ -466,11 +469,11 @@ body {
   }
 }
 .pointer-up {
-  transform: translate(50%, -100%);
+  transform: translate(-50%, -100%) scaleX(-1);
 }
 
 .pointer-down {
-  transform: translate(50%, -100%) scaleY(-1);
+  transform: translate(-50%, -100%) scaleY(-1) scaleX(-1);
 }
 
 .activator {

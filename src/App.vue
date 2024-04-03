@@ -19,6 +19,10 @@ window.addEventListener("touchmove", preventDefault, { passive: false });
 
 onMounted(() => {
   createAnimation();
+
+  if (spinRef.value) {
+    spinRef.value.style.background = getBackgroundColor();
+  }
 });
 
 let lastTimeStamp: number;
@@ -174,7 +178,7 @@ const getBackgroundColor = () => {
 type Person = {
   name: string;
   avatarUrl: string;
-  backgroundColor?: string;
+  backgroundColor: string;
 };
 
 // Check if URL has state query
@@ -236,9 +240,23 @@ watchEffect(() => {
 });
 
 const getStyle = (index: number) => {
+  const isOnePerson = finalPeople.value.length === 1;
+
   const rotate = 360 / finalPeople.value.length;
   const rotateDeg = rotate * index;
   const sliceDegree = 180 - rotate;
+
+  if (isOnePerson && spinRef.value) {
+    spinRef.value.style.background = finalPeople.value[index].backgroundColor;
+
+    return {
+      "--rotate-degree": `${rotateDeg}deg`,
+      "--rotate-content": `${-rotateDeg}deg`,
+      "--text-position": "4%",
+      zIndex: index,
+    };
+  }
+
   return {
     "--slice-degree": `${sliceDegree}deg`,
     "--background": finalPeople.value[index].backgroundColor,

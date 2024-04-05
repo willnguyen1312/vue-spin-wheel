@@ -259,14 +259,35 @@ const getStyle = (index: number) => {
 };
 
 const showWinner = async () => {
-  const resultList = includedPeople.value.sort();
   const length = includedPeople.value.length;
-  const index =
-    Math.floor(spinDeg.value / (360 / resultList.length)) -
-    Math.floor(length / 2);
+  const sortedIncludedPeople = includedPeople.value.sort();
+  const middlePerson = sortedIncludedPeople[0];
 
-  const result =
-    index < 0 ? resultList[resultList.length + index] : resultList[index];
+  const isEven = length % 2 === 0;
+
+  const half = Math.floor(sortedIncludedPeople.length / 2);
+  let left: string[] = [];
+  let right: string[] = [];
+  let index = 0;
+  let result: string = "";
+
+  if (isEven) {
+    left = sortedIncludedPeople.slice(1, 1 + half).reverse();
+    right = sortedIncludedPeople.slice(1 + half).reverse();
+    const resultList = [...left, middlePerson, ...right];
+
+    index = Math.floor(spinDeg.value / (360 / resultList.length));
+    result = resultList[index % length];
+  } else {
+    left = sortedIncludedPeople.slice(1, 1 + half).reverse();
+    right = sortedIncludedPeople.slice(1 + half).reverse();
+    const resultList = [...left, middlePerson, ...right];
+
+    const piece = 360 / resultList.length;
+
+    index = Math.floor((spinDeg.value - piece / 2) / piece);
+    result = resultList[index % length];
+  }
 
   const winnerPerson = finalPeople.value.find(
     (person) => person.name === result

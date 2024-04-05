@@ -210,15 +210,6 @@ const finalPeople = computed(() =>
   people.value.filter((person) => includedPeople.value.includes(person.name))
 );
 
-const resultList = computed(() => {
-  const initialList = finalPeople.value
-    .filter((person) => includedPeople.value.includes(person.name))
-    .map((person) => person.name);
-  const reversedList = initialList.slice(1);
-  reversedList.reverse();
-  return [initialList[0], ...reversedList];
-});
-
 watchEffect(() => {
   localStorage.setItem(
     "includedPeople",
@@ -268,15 +259,14 @@ const getStyle = (index: number) => {
 };
 
 const showWinner = async () => {
+  const resultList = includedPeople.value.sort();
   const length = includedPeople.value.length;
   const index =
-    Math.floor(spinDeg.value / (360 / resultList.value.length)) -
+    Math.floor(spinDeg.value / (360 / resultList.length)) -
     Math.floor(length / 2);
 
   const result =
-    index < 0
-      ? resultList.value[resultList.value.length + index]
-      : resultList.value[index];
+    index < 0 ? resultList[resultList.length + index] : resultList[index];
 
   const winnerPerson = finalPeople.value.find(
     (person) => person.name === result
@@ -422,7 +412,6 @@ body {
 .wrapper {
   --pointer-height: 40px;
   --spin-wrapper-size: 600px;
-  --spinning-deg: v-bind(spinDeg + "deg");
   display: flex;
   justify-content: center;
   gap: 100px;
@@ -464,7 +453,7 @@ body {
     rotate: v-bind(currentDeg + "deg");
   }
   to {
-    rotate: var(--spinning-deg);
+    rotate: v-bind(spinDeg + "deg");
   }
 }
 

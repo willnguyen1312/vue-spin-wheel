@@ -54,6 +54,7 @@ const getDegreeFromCenter = (x: number, y: number) => {
 
 const handlePointerDown = (e: PointerEvent) => {
   animationOverFlow.value = "hidden";
+  winner.value = undefined;
   preventDefault(e);
 
   if (state.value === "spinning" || state.value === "manual") return;
@@ -192,7 +193,9 @@ const initialIncludedPeople: string[] =
   decodedState.includedPeople ??
   JSON.parse(localStorage.getItem("includedPeople") ?? "[]");
 
-const people = ref<Person[]>(initialPeople);
+const people = ref<Person[]>(
+  initialPeople.sort((first, second) => first.name.localeCompare(second.name))
+);
 
 const includedPeople = ref<string[]>(initialIncludedPeople);
 
@@ -274,18 +277,24 @@ const showWinner = async () => {
   if (isEven) {
     left = sortedIncludedPeople.slice(1, 1 + half).reverse();
     right = sortedIncludedPeople.slice(1 + half).reverse();
-    const resultList = [...left, middlePerson, ...right];
+    const _resultList = [...left, middlePerson, ...right];
+    const resultList = spinDeg.value < 0 ? _resultList.reverse() : _resultList;
 
-    index = Math.floor(spinDeg.value / (360 / resultList.length));
+    index = Math.floor(Math.abs(spinDeg.value) / (360 / resultList.length));
     result = resultList[index % length];
   } else {
     left = sortedIncludedPeople.slice(1, 1 + half).reverse();
     right = sortedIncludedPeople.slice(1 + half).reverse();
-    const resultList = [...left, middlePerson, ...right];
+    const _resultList = [...left, middlePerson, ...right];
+    const resultList = spinDeg.value < 0 ? _resultList.reverse() : _resultList;
 
     const piece = 360 / resultList.length;
 
-    index = Math.floor((spinDeg.value - piece / 2) / piece);
+    index = Math.floor(
+      (spinDeg.value < 0
+        ? Math.abs(spinDeg.value) + piece / 2
+        : spinDeg.value - piece / 2) / piece
+    );
     result = resultList[index % length];
   }
 

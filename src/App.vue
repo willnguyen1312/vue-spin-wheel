@@ -129,8 +129,10 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
 window.addEventListener("keydown", (e: KeyboardEvent) => {
   const isMetaKeyPressed = e.metaKey || e.ctrlKey;
   const isOnTheMove = checkOnTheMove();
+  const hasMetaKeyPressWithA = isMetaKeyPressed && e.key === "a";
+  hasMetaKeyPressWithA && e.preventDefault();
 
-  if (isMetaKeyPressed && e.key === "s" && !isOnTheMove) {
+  if (isMetaKeyPressed && e.key === "s") {
     e.preventDefault();
     // Update URL to include search query in URL
     const decodedState = encode({
@@ -143,8 +145,7 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
     navigator.clipboard.writeText(window.location.href);
   }
 
-  if (isMetaKeyPressed && e.key === "a" && !isOnTheMove) {
-    e.preventDefault();
+  if (hasMetaKeyPressWithA && !isOnTheMove) {
     // Toggle all people
     const isAllSelected = people.value.every((person) =>
       includedPeople.value.includes(person.name)

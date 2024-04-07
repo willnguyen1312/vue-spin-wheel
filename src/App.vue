@@ -9,13 +9,9 @@ const lastManualDeg = ref();
 const lastCurrentDeg = ref(0);
 const animationOverFlow = ref<"hidden" | "visible">("hidden");
 
-function preventDefault(event: Event) {
-  event.preventDefault();
+function checkOnTheMove() {
+  return state.value === "spinning" || state.value === "manual";
 }
-
-window.addEventListener("DOMMouseScroll", preventDefault);
-window.addEventListener("wheel", preventDefault, { passive: false });
-window.addEventListener("touchmove", preventDefault, { passive: false });
 
 onMounted(() => {
   createAnimation();
@@ -53,11 +49,11 @@ const getDegreeFromCenter = (x: number, y: number) => {
 };
 
 const handlePointerDown = (e: PointerEvent) => {
+  e.preventDefault();
   animationOverFlow.value = "hidden";
   winner.value = undefined;
-  preventDefault(e);
 
-  if (state.value === "spinning" || state.value === "manual") return;
+  if (checkOnTheMove()) return;
 
   lastManualDeg.value = getDegreeFromCenter(e.clientX, e.clientY);
   lastCurrentDeg.value = currentDeg.value;
@@ -68,9 +64,9 @@ const handlePointerDown = (e: PointerEvent) => {
 };
 
 window.addEventListener("pointerup", (e: PointerEvent) => {
-  preventDefault(e);
+  e.preventDefault();
 
-  if (state.value === "spinning" || state.value === "manual") return;
+  if (checkOnTheMove()) return;
   const degDiff = currentDeg.value - lastCurrentDeg.value;
   const timeDiff = (Date.now() - lastTimeStamp) / timeThreshold;
   const hasSpun = currentDeg.value - lastDeg !== 0;
@@ -111,14 +107,9 @@ const runMe = () => {
 };
 
 window.addEventListener("pointermove", (e: PointerEvent) => {
-  preventDefault(e);
+  e.preventDefault();
 
-  if (
-    state.value === "spinning" ||
-    state.value === "manual" ||
-    !lastManualDeg.value
-  )
-    return;
+  if (checkOnTheMove() || !lastManualDeg.value) return;
 
   runMe();
 
@@ -136,7 +127,10 @@ window.addEventListener("pointermove", (e: PointerEvent) => {
 });
 
 window.addEventListener("keydown", (e: KeyboardEvent) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+  const isMetaKeyPressed = e.metaKey || e.ctrlKey;
+  const isOnTheMove = checkOnTheMove();
+
+  if (isMetaKeyPressed && e.key === "s" && !isOnTheMove) {
     e.preventDefault();
     // Update URL to include search query in URL
     const decodedState = encode({
@@ -149,11 +143,11 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
     navigator.clipboard.writeText(window.location.href);
   }
 
-  if ((e.metaKey || e.ctrlKey) && e.key === "a") {
+  if (isMetaKeyPressed && e.key === "a" && !isOnTheMove) {
     e.preventDefault();
     // Toggle all people
     const isAllSelected = people.value.every((person) =>
-      includedPeople.value.includes(person.name),
+      includedPeople.value.includes(person.name)
     );
 
     if (isAllSelected) {
@@ -166,10 +160,10 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50,
+    Math.random() * (100 - 50) + 50
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -194,7 +188,7 @@ const initialIncludedPeople: string[] =
   JSON.parse(localStorage.getItem("includedPeople") ?? "[]");
 
 const people = ref<Person[]>(
-  initialPeople.sort((first, second) => first.name.localeCompare(second.name)),
+  initialPeople.sort((first, second) => first.name.localeCompare(second.name))
 );
 
 const includedPeople = ref<string[]>(initialIncludedPeople);
@@ -206,17 +200,17 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: getBackgroundColor(),
-    }) satisfies Person,
+    } satisfies Person)
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name)),
+  people.value.filter((person) => includedPeople.value.includes(person.name))
 );
 
 watch(includedPeople, (newIncludedPeople) => {
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(newIncludedPeople, null, 2),
+    JSON.stringify(newIncludedPeople, null, 2)
   );
 
   // Reload for getting new fun colors 😊
@@ -283,13 +277,13 @@ const showWinner = async () => {
     index = Math.floor(
       (spinDeg.value < 0
         ? Math.abs(spinDeg.value) + piece / 2
-        : spinDeg.value - piece / 2) / piece,
+        : spinDeg.value - piece / 2) / piece
     );
     result = resultList[index % length];
   }
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result,
+    (person) => person.name === result
   );
   if (winnerPerson) {
     winner.value = winnerPerson;

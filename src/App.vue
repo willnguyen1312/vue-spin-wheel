@@ -17,7 +17,6 @@ function preventDefault(event: Event) {
   event.preventDefault();
 }
 
-window.addEventListener("DOMMouseScroll", preventDefault);
 window.addEventListener("wheel", preventDefault, { passive: false });
 window.addEventListener("touchmove", preventDefault, { passive: false });
 

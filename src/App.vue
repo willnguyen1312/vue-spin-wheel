@@ -13,6 +13,14 @@ function checkOnTheMove() {
   return state.value === "spinning" || state.value === "manual";
 }
 
+function preventDefault(event: Event) {
+  event.preventDefault();
+}
+
+window.addEventListener("DOMMouseScroll", preventDefault);
+window.addEventListener("wheel", preventDefault, { passive: false });
+window.addEventListener("touchmove", preventDefault, { passive: false });
+
 onMounted(() => {
   createAnimation();
 
@@ -49,7 +57,7 @@ const getDegreeFromCenter = (x: number, y: number) => {
 };
 
 const handlePointerDown = (e: PointerEvent) => {
-  e.preventDefault();
+  preventDefault(e);
   animationOverFlow.value = "hidden";
   winner.value = undefined;
 
@@ -64,7 +72,7 @@ const handlePointerDown = (e: PointerEvent) => {
 };
 
 window.addEventListener("pointerup", (e: PointerEvent) => {
-  e.preventDefault();
+  preventDefault(e);
 
   if (checkOnTheMove()) return;
   const degDiff = currentDeg.value - lastCurrentDeg.value;
@@ -107,7 +115,7 @@ const runMe = () => {
 };
 
 window.addEventListener("pointermove", (e: PointerEvent) => {
-  e.preventDefault();
+  preventDefault(e);
 
   if (checkOnTheMove() || !lastManualDeg.value) return;
 
@@ -130,10 +138,10 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
   const isMetaKeyPressed = e.metaKey || e.ctrlKey;
   const isOnTheMove = checkOnTheMove();
   const hasMetaKeyPressWithA = isMetaKeyPressed && e.key === "a";
-  hasMetaKeyPressWithA && e.preventDefault();
+  hasMetaKeyPressWithA && preventDefault(e);
 
   if (isMetaKeyPressed && e.key === "s") {
-    e.preventDefault();
+    preventDefault(e);
     // Update URL to include search query in URL
     const decodedState = encode({
       people: people.value,

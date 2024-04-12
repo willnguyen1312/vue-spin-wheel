@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from "vue";
+import { ref, computed, watch, onMounted, nextTick, watchEffect } from "vue";
 import { createAnimation, decode, encode } from "./utils";
 const state = ref<"idle" | "spinning" | "finished" | "manual">("idle");
 const spinDeg = ref(0);
@@ -224,6 +224,10 @@ watch(includedPeople, (newIncludedPeople) => {
   // Reload for getting new fun colors 😊
   const currentURL = new URL(window.location.href);
   location.href = currentURL.origin + currentURL.pathname;
+});
+
+watchEffect(() => {
+  localStorage.setItem("items", JSON.stringify(people.value, null, 2));
 });
 
 const getStyle = (index: number) => {

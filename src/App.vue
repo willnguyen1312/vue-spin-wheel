@@ -222,7 +222,8 @@ watch(includedPeople, (newIncludedPeople) => {
   );
 
   // Reload for getting new fun colors 😊
-  location.reload();
+  const currentURL = new URL(window.location.href);
+  location.href = currentURL.origin + currentURL.pathname;
 });
 
 const getStyle = (index: number) => {

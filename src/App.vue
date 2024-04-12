@@ -189,9 +189,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const stateQuery = urlParams.get("state") ?? "";
 const decodedState = decode(stateQuery) ?? {};
 
-// Remove query from URL without refreshing
-history.replaceState(null, "", window.location.pathname);
-
 const initialPeople: Person[] =
   decodedState.people ?? JSON.parse(localStorage.getItem("items") ?? "[]");
 const initialIncludedPeople: string[] =
@@ -231,6 +228,10 @@ watch(includedPeople, (newIncludedPeople) => {
 
 watchEffect(() => {
   localStorage.setItem("items", JSON.stringify(people.value, null, 2));
+  if (stateQuery) {
+    // Remove query from URL without refreshing
+    history.replaceState(null, "", window.location.pathname);
+  }
 });
 
 const getStyle = (index: number) => {

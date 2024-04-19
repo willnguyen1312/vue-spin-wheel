@@ -155,7 +155,7 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
   if (hasMetaKeyPressWithA && !isOnTheMove) {
     // Toggle all people
     const isAllSelected = people.value.every((person) =>
-      includedPeople.value.includes(person.name)
+      includedPeople.value.includes(person.name),
     );
 
     if (isAllSelected) {
@@ -168,10 +168,10 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 
 const getBackgroundColor = () => {
   const first = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%,${Math.random()})`;
   const second = `hsl(${Math.floor(Math.random() * 361)},100%,${Math.floor(
-    Math.random() * (100 - 50) + 50
+    Math.random() * (100 - 50) + 50,
   )}%)`;
 
   const gradient = `linear-gradient(${first}, ${second})`;
@@ -201,7 +201,7 @@ const initialIncludedPeople: string[] =
   JSON.parse(localStorage.getItem("includedPeople") ?? "[]");
 
 const people = ref<Person[]>(
-  initialPeople.sort((first, second) => first.name.localeCompare(second.name))
+  initialPeople.sort((first, second) => first.name.localeCompare(second.name)),
 );
 
 const includedPeople = ref<string[]>(initialIncludedPeople);
@@ -213,11 +213,11 @@ people.value = people.value.map(
     ({
       ...item,
       backgroundColor: getBackgroundColor(),
-    } satisfies Person)
+    }) satisfies Person,
 );
 
 const finalPeople = computed(() =>
-  people.value.filter((person) => includedPeople.value.includes(person.name))
+  people.value.filter((person) => includedPeople.value.includes(person.name)),
 );
 
 watch(includedPeople, () => {
@@ -230,7 +230,7 @@ watchEffect(() => {
   localStorage.setItem("items", JSON.stringify(people.value, null, 2));
   localStorage.setItem(
     "includedPeople",
-    JSON.stringify(includedPeople.value, null, 2)
+    JSON.stringify(includedPeople.value, null, 2),
   );
 });
 
@@ -294,13 +294,13 @@ const showWinner = async () => {
     index = Math.floor(
       (spinDeg.value < 0
         ? Math.abs(spinDeg.value) + piece / 2
-        : spinDeg.value - piece / 2) / piece
+        : spinDeg.value - piece / 2) / piece,
     );
     result = resultList[index % length];
   }
 
   const winnerPerson = finalPeople.value.find(
-    (person) => person.name === result
+    (person) => person.name === result,
   );
   if (winnerPerson) {
     winner.value = winnerPerson;

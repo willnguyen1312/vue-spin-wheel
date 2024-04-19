@@ -15,13 +15,13 @@
   },
   "dependencies": {
     "lz-string": "^1.5.0",
-    "vue": "^3.4.21"
+    "vue": "^3.4.23"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
-    "typescript": "^5.4.3",
-    "vite": "^5.2.8",
-    "vite-plugin-pwa": "^0.19.7",
-    "vue-tsc": "^2.0.7"
+    "typescript": "^5.4.5",
+    "vite": "^5.2.9",
+    "vite-plugin-pwa": "^0.19.8",
+    "vue-tsc": "^2.0.13"
   }
 }
